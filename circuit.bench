@@ -1,0 +1,33 @@
+# c17
+# 6 inputs
+# 4 outputs
+# 0 inverter
+# 12 gates ( 5 XORs, 5 ANDs, 2 ORs )
+
+# INPUTS:
+INPUT(a0)
+INPUT(b0)
+INPUT(a1)
+INPUT(b1)
+INPUT(a2)
+INPUT(b2)
+
+# OUTPUTS:
+OUTPUT(Z0)
+OUTPUT(Z1)
+OUTPUT(Z2)
+OUTPUT(Zco)
+
+# GATES:
+Z0 = XOR(a0, b0)
+c = AND(a0, b0)
+d = XOR(a1, b1)
+e = AND(a1, b1)
+Z1 = XOR(c, d)
+h = AND(c, d)
+i = OR(e, h)
+f = XOR(a2, b2)
+g = AND(a2, b2)
+Z2 = XOR(f, i)
+j = AND(f, i)
+Zco = OR(g, j)
