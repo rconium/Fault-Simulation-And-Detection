@@ -1,0 +1,9 @@
+#fault list file
+#for adder circuit
+#fault_list1.txt
+
+Z0-IN-a0-SA-0
+b2-SA-1
+g-IN-a2-SA-1
+j-IN-f-SA-0
+Zco-IN-g-SA-0
