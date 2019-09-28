@@ -1,0 +1,16 @@
+# test vector file
+# for circuit.bench
+# input_fsd.txt
+# given ETV_set 3: 4 TV s
+
+# all 0s
+000000
+
+# all 1s
+111111
+
+# alternating 0 and 1’s with LSB = 0
+101010
+
+# alternating 0 and 1’s with LSB = 1
+010101
