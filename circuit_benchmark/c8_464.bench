@@ -1,0 +1,23 @@
+# 6 inputs
+# circuit example used in FA19 ECE464
+# 2 outputs 
+# 8 gates
+
+INPUT(A)
+INPUT(B)
+INPUT(C)
+INPUT(D)
+INPUT(E)
+INPUT(F)
+
+OUTPUT(S)
+OUTPUT(T)
+
+p = NAND(n, m)
+k = NOR(E, F)
+m = OR(C,g)
+S = NOR(g, p)
+g = AND(A, B)
+o = NOT(D)
+n = NOT(C)
+T = AND (p,o,k)
