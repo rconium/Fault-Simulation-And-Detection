@@ -546,6 +546,8 @@ def main():
         # printCkt(circuit)
         print(circuit)
 
+        # Preserve circuit before reset
+        preserver = circuit
 
         for y in circuit["OUTPUTS"][1]:
             if not circuit[y][2]:
@@ -571,6 +573,7 @@ def main():
         print(circuit)
 
         print("\n*******************\n")
+        
         
     outputFile.close
     #exit()
