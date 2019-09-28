@@ -33,12 +33,15 @@ def printCkt (circuit):
 def netRead(netName):
     # Opening the netlist file:
     netFile = open(netName, "r")
+    outputFile = open('full_f_list', "w")
 
     # temporary variables
     inputs = []     # array of the input wires
     outputs = []    # array of the output wires
     gates = []      # array of the gate list
     inputBits = 0   # the number of inputs needed in this given circuit
+    total_faults = 0 # the number of faults per inputs, outputs, and gate inputs/outputs
+    full_fault_list = [] # array of the full fault list
 
 
     # main variable to hold the circuit netlist, this is a dictionary in Python, where:
@@ -67,13 +70,25 @@ def netRead(netName):
 
         # Read a INPUT wire and add to circuit:
         if (line[0:5] == "INPUT"):
+            # wire SA-0 and SA-1
+            total_faults += 2
             # Removing everything but the line variable name
             line = line.replace("INPUT", "")
             line = line.replace("(", "")
             line = line.replace(")", "")
 
             # Format the variable name to wire_*VAR_NAME*
+            # Wire_names --> preserve the wire names
+            wire_names = line
             line = "wire_" + line
+
+            # Stuck at 0 and at 1 line formatting
+            sa_0 = wire_names + "-SA-0"
+            sa_1 = wire_names + "-SA-1"
+
+            # Append the input wire stuck at faults to the full fault list
+            full_fault_list.append(sa_0)
+            full_fault_list.append(sa_1)
 
             # Error detection: line being made already exists
             if line in circuit:
@@ -90,6 +105,9 @@ def netRead(netName):
             inputBits += 1
             print(line)
             print(circuit[line])
+            print(sa_0)
+            print(sa_1)
+            print("")
             continue
 
         # Read an OUTPUT wire and add to the output array list
@@ -106,7 +124,12 @@ def netRead(netName):
 
         # Read a gate output wire, and add to the circuit dictionary
         lineSpliced = line.split("=") # splicing the line at the equals sign to get the gate output wire
+        # preserve output wire name
+        outputWire = lineSpliced[0]
         gateOut = "wire_" + lineSpliced[0]
+
+        # Count the number of gate output wires
+        total_faults += 2
 
         # Error detection: line being made already exists
         if gateOut in circuit:
@@ -124,12 +147,38 @@ def netRead(netName):
         lineSpliced[1] = lineSpliced[1].replace(")", "")
         terms = lineSpliced[1].split(",")  # Splicing the the line again at each comma to the get the gate terminals
         # Turning each term into an integer before putting it into the circuit dictionary
+        # wire_names --> preserve the wire names
+        wire_names = terms
         terms = ["wire_" + x for x in terms]
 
         # add the gate output wire to the circuit dictionary with the dest as the key
         circuit[gateOut] = [logic, terms, False, 'U']
         print(gateOut)
-        print(circuit[gateOut])
+        print(circuit[gateOut])        
+
+        print("WIRE NAMES")
+        print(wire_names)  
+        print(outputWire  + "-SA-0")
+        print(outputWire  + "-SA-1")       
+        
+        # Append the gate output wire stuck at faults to the full fault list
+        full_fault_list.append(outputWire  + "-SA-0")
+        full_fault_list.append(outputWire  + "-SA-1")   
+        
+        for x in wire_names:
+            total_faults += 2
+
+            # stuck at 0 and at 1 line formatting
+            sa_0 = outputWire + "-IN-" + x + "-SA-0"
+            sa_1 = outputWire + "-IN-" + x + "-SA-1"
+            print(sa_0)
+            print(sa_1)
+
+            # Append the gate input wires stuck at faults to the full fault list
+            full_fault_list.append(sa_0)
+            full_fault_list.append(sa_1)
+        
+        print("")
 
     # now after each wire is built into the circuit dictionary,
     # add a few more non-wire items: input width, input array, output array, gate list
@@ -141,11 +190,17 @@ def netRead(netName):
     circuit["GATES"] = ["Gate list", gates]
 
     print("\n bookkeeping items in circuit: \n")
+    print('TOTAL FAULTS: ')
+    print(total_faults)
     print(circuit["INPUT_WIDTH"])
     print(circuit["INPUTS"])
     print(circuit["OUTPUTS"])
     print(circuit["GATES"])
 
+    outputFile.write('# circuit.bench\n# full SSA fault list\n\n')
+    for line in full_fault_list:
+        outputFile.write(line + '\n')
+    outputFile.write('\n# total faults: ' + str(total_faults))
 
     return circuit
 
@@ -361,8 +416,8 @@ def basic_sim(circuit):
             print("Progress: updating " + curr + " = " + circuit[curr][3] + " as the output of " + circuit[curr][0] + " for:")
             for term in circuit[curr][1]:
                 print(term + " = " + circuit[term][3])
-            print("\nPress Enter to Continue...")
-            input()
+            # print("\nPress Enter to Continue...")
+            # input()
 
         else:
             # If the terminals have not been accessed yet, append the current node at the end of the queue
