@@ -208,9 +208,18 @@ def netRead(netName):
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: calculates the output value for each logic gate
 def gateCalc(circuit, node):
-    
+
     # terminal will contain all the input wires of this logic gate (node)
     terminals = list(circuit[node][1])  
+    # print("THIS IS THE FUCKING NODES")
+    # print(node)
+    # print(circuit[node])
+    # print(circuit[node][0])
+
+    # print ("THIS IS THE FUCKIING TERMINALS")
+    # print(terminals[0])
+    # print(circuit[terminals[0]])
+    # print("")
 
     # If the node is an Inverter gate output, solve and return the output
     if circuit[node][0] == "NOT":
@@ -350,6 +359,203 @@ def gateCalc(circuit, node):
     return circuit[node][0]
 
 
+def faultGateCalc(circuit, node, lineSpliced):
+    # terminal will contain all the input wires of this logic gate (node)
+    terminals = list(circuit[node][1])  
+
+    print ("THE FAULT IN CONSIDERATION")
+    print (lineSpliced)
+    
+    # get fault node, terminal, and value
+    if (lineSpliced[1] == 'IN'):
+        fault_wire_node = 'wire_' + lineSpliced[0]
+        fault_wire_term = 'wire_' + lineSpliced[2]
+        fault_wire_val = lineSpliced[4]
+        print (fault_wire_node)
+        print (fault_wire_term)
+        print (fault_wire_val)
+    else:
+        fault_wire_term = 'wire_' + lineSpliced[0]
+        fault_wire_node = fault_wire_term
+        fault_wire_val = lineSpliced[2]
+        print (fault_wire_node)
+        print (fault_wire_term)
+        print ('NEW VALUE')
+        print (fault_wire_val)
+        print("")
+
+    print("THIS IS THE CURRENT NODE")
+    print(node)
+    print(lineSpliced[1])
+    print(terminals)
+
+    print("THIS IS THE CURRENT TERM")
+    print(fault_wire_term)
+    print("OLD VALUE ")
+    old_val = circuit[fault_wire_term][3]
+    print(old_val)
+
+    # Change gate input terminal wire value to stuck-at value 
+    if node == fault_wire_node and lineSpliced[1] == 'IN':
+        for term in terminals:
+            if (term == fault_wire_term):
+                circuit[term][3] = fault_wire_val
+                print(term + " is ")
+                print(circuit[term][3])  
+    # Change wire value to stuck-at value
+    elif lineSpliced[1] != 'IN':
+        for term in terminals:
+            if (term == fault_wire_term):
+                print(fault_wire_term + " now has ")
+                circuit[fault_wire_term][3] = fault_wire_val
+                print(circuit[fault_wire_term][3])
+    
+    # If the node is an Inverter gate output, solve and return the output
+    if circuit[node][0] == "NOT":
+        if circuit[terminals[0]][3] == '0':
+            circuit[node][3] = '1'
+        elif circuit[terminals[0]][3] == '1':
+            circuit[node][3] = '0'
+        elif circuit[terminals[0]][3] == "U":
+            circuit[node][3] = "U"
+        else:  # Should not be able to come here
+            return -1
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # If the node is an AND gate output, solve and return the output
+    elif circuit[node][0] == "AND":
+        # Initialize the output to 1
+        circuit[node][3] = '1'
+        # Initialize also a flag that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 0 at any input terminal, AND output is 0. If there is an unknown terminal, mark the flag
+        # Otherwise, keep it at 1
+        for term in terminals:  
+            if circuit[term][3] == '0':
+                circuit[node][3] = '0'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+
+        if unknownTerm:
+            if circuit[node][3] == '1':
+                circuit[node][3] = "U"
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # If the node is a NAND gate output, solve and return the output
+    elif circuit[node][0] == "NAND":
+        # Initialize the output to 0
+        circuit[node][3] = '0'
+        # Initialize also a variable that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 0 terminal, NAND changes the output to 1. If there is an unknown terminal, it
+        # changes to "U" Otherwise, keep it at 0
+        for term in terminals:
+            if circuit[term][3] == '0':
+                circuit[node][3] = '1'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+                break
+
+        if unknownTerm:
+            if circuit[node][3] == '0':
+                circuit[node][3] = "U"
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # If the node is an OR gate output, solve and return the output
+    elif circuit[node][0] == "OR":
+        # Initialize the output to 0
+        circuit[node][3] = '0'
+        # Initialize also a variable that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 1 terminal, OR changes the output to 1. Otherwise, keep it at 0
+        for term in terminals:
+            if circuit[term][3] == '1':
+                circuit[node][3] = '1'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+
+        if unknownTerm:
+            if circuit[node][3] == '0':
+                circuit[node][3] = "U"
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # If the node is an NOR gate output, solve and return the output
+    if circuit[node][0] == "NOR":
+        # Initialize the output to 1
+        circuit[node][3] = '1'
+        # Initialize also a variable that detects a U to false
+        unknownTerm = False  # This will become True if at least one unknown terminal is found
+
+        # if there is a 1 terminal, NOR changes the output to 0. Otherwise, keep it at 1
+        for term in terminals:
+            if circuit[term][3] == '1':
+                circuit[node][3] = '0'
+                break
+            if circuit[term][3] == "U":
+                unknownTerm = True
+        if unknownTerm:
+            if circuit[node][3] == '1':
+                circuit[node][3] = "U"
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # If the node is an XOR gate output, solve and return the output
+    if circuit[node][0] == "XOR":
+        # Initialize a variable to zero, to count how many 1's in the terms
+        count = 0
+
+        # if there are an odd number of terminals, XOR outputs 1. Otherwise, it should output 0
+        for term in terminals:
+            if circuit[term][3] == '1':
+                count += 1  # For each 1 bit, add one count
+            if circuit[term][3] == "U":
+                circuit[node][3] = "U"
+                circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                return circuit
+
+        # check how many 1's we counted
+        if count % 2 == 1:  # if more than one 1, we know it's going to be 0.
+            circuit[node][3] = '1'
+        else:  # Otherwise, the output is equal to how many 1's there are
+            circuit[node][3] = '0'
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # If the node is an XNOR gate output, solve and return the output
+    elif circuit[node][0] == "XNOR":
+        # Initialize a variable to zero, to count how many 1's in the terms
+        count = 0
+
+        # if there is a single 1 terminal, XNOR outputs 0. Otherwise, it outputs 1
+        for term in terminals:
+            if circuit[term][3] == '1':
+                count += 1  # For each 1 bit, add one count
+            if circuit[term][3] == "U":
+                circuit[node][3] = "U"
+                circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                return circuit
+
+        # check how many 1's we counted
+        if count % 2 == 1:  # if more than one 1, we know it's going to be 0.
+            circuit[node][3] = '1'
+        else:  # Otherwise, the output is equal to how many 1's there are
+            circuit[node][3] = '0'
+        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        return circuit
+
+    # Error detection... should not be able to get at this point
+    return circuit[node][0]
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Updating the circuit dictionary with the input line, and also resetting the gates and output lines
 def inputRead(circuit, line):
@@ -379,7 +585,7 @@ def inputRead(circuit, line):
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: the actual simulation #
-def basic_sim(circuit):
+def basic_sim(circuit, lineSpliced, mode):
     # QUEUE and DEQUEUE
     # Creating a queue, using a list, containing all of the gates in the circuit
     queue = list(circuit["GATES"][1])
@@ -406,7 +612,11 @@ def basic_sim(circuit):
 
         if term_has_value:
             circuit[curr][2] = True
-            circuit = gateCalc(circuit, curr)
+            if mode == 1:
+                circuit = gateCalc(circuit, curr)
+            else:
+                circuit = faultGateCalc(circuit, curr, lineSpliced)
+
 
             # ERROR Detection if LOGIC does not exist
             if isinstance(circuit, str):
@@ -539,15 +749,11 @@ def main():
             print("...move on to next input\n")
             continue
 
-
-        circuit = basic_sim(circuit)
+        circuit = basic_sim(circuit, 'NULL', 1)
         print("\n *** Finished simulation - resulting circuit: \n")
         # Uncomment the following line, for the neater display of the function and then comment out print(circuit)
         # printCkt(circuit)
-        print(circuit)
-
-        # Preserve circuit before reset
-        preserver = circuit
+        print(circuit)     
 
         for y in circuit["OUTPUTS"][1]:
             if not circuit[y][2]:
@@ -561,7 +767,7 @@ def main():
 
         # After each input line is finished, reset the circuit
         print("\n *** Now resetting circuit back to unknowns... \n")
-       
+    
         for key in circuit:
             if (key[0:5]=="wire_"):
                 circuit[key][2] = False
@@ -573,9 +779,111 @@ def main():
         print(circuit)
 
         print("\n*******************\n")
-        
-        
+
     outputFile.close
+    inputFile.close
+    inputFaultFile = open('fault_list1.txt', "r")
+    outputFaultFile = open('fault_list1_output', "w")
+
+    # Reading in the fault_list1 file line by line
+    for fault in inputFaultFile:
+        
+        inputFile = open(inputName, "r")
+        
+        # Do nothing else if empty lines, ...
+        if (fault == "\n"):
+            continue
+        # ... or any comments
+        if (fault[0] == "#"):
+            continue
+
+        # Removing the the newlines at the end and then output it to the txt file
+        fault = fault.replace("\n", "")
+        outputFaultFile.write(fault + '\n')
+
+        # Removing spaces
+        fault = fault.replace(" ", "")
+
+        lineSpliced = fault.split("-") # splicing the line at the dash sign to get the gate output wire
+
+        # Runs the simulator for each line of the input file
+        for line in inputFile:
+            # Initializing output variable each input line
+            output = ""
+
+            # Do nothing else if empty lines, ...
+            if (line == "\n"):
+                continue
+            # ... or any comments
+            if (line[0] == "#"):
+                continue
+
+            # Removing the the newlines at the end and then output it to the txt file
+            line = line.replace("\n", "")
+            outputFaultFile.write(line)
+
+            # Removing spaces
+            line = line.replace(" ", "")
+            
+            print("\n before processing circuit dictionary...")
+            # Uncomment the following line, for the neater display of the function and then comment out print(circuit)
+            # printCkt(circuit)
+            print(circuit)
+            print("\n ---> Now ready to simulate INPUT = " + line)
+            circuit = inputRead(circuit, line)
+            # Uncomment the following line, for the neater display of the function and then comment out print(circuit)
+            # printCkt(circuit)
+            print(circuit)
+
+
+            if circuit == -1:
+                print("INPUT ERROR: INSUFFICIENT BITS")
+                outputFaultFile.write(" -> INPUT ERROR: INSUFFICIENT BITS" + "\n")
+                # After each input line is finished, reset the netList
+                circuit = newCircuit
+                print("...move on to next input\n")
+                continue
+            elif circuit == -2:
+                print("INPUT ERROR: INVALID INPUT VALUE/S")
+                outputFaultFile.write(" -> INPUT ERROR: INVALID INPUT VALUE/S" + "\n")
+                # After each input line is finished, reset the netList
+                circuit = newCircuit
+                print("...move on to next input\n")
+                continue
+
+            circuit = basic_sim(circuit, lineSpliced, 2)
+            print("\n *** Finished simulation - resulting circuit: \n")
+            # Uncomment the following line, for the neater display of the function and then comment out print(circuit)
+            # printCkt(circuit)
+            print(circuit)     
+
+            for y in circuit["OUTPUTS"][1]:
+                if not circuit[y][2]:
+                    output = "NETLIST ERROR: OUTPUT LINE \"" + y + "\" NOT ACCESSED"
+                    break
+                output = str(circuit[y][3]) + output
+
+            print("\n *** Summary of simulation: ")
+            print(line + " -> " + output + " written into output file. \n")
+            outputFaultFile.write(" -> " + output + "\n")
+
+            # After each input line is finished, reset the circuit
+            print("\n *** Now resetting circuit back to unknowns... \n")
+        
+            for key in circuit:
+                if (key[0:5]=="wire_"):
+                    circuit[key][2] = False
+                    circuit[key][3] = 'U'
+
+            print("\n circuit after resetting: \n")
+            # Uncomment the following line, for the neater display of the function and then comment out print(circuit)
+            # printCkt(circuit)
+            print(circuit)
+
+            print("\n*******************\n")
+            inputFile.close
+    
+    outputFaultFile.close
     #exit()
 
 

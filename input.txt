@@ -1,14 +1,12 @@
 # 6 bits, with out carryout
-010101
+000000
 
 # 6 bits, Only 1's and 0's, With carryout
-101111
+111111
 
 # 8 bits, with upper-case U's
-0U0111U0
+101010
 
 # 6 bits, with lower-case u's, w/o carryout
-00u010
+010101
 
-# 6 bits, with upper-case u's, with Carryout
-1UU010
