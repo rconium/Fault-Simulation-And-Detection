@@ -362,6 +362,7 @@ def gateCalc(circuit, node):
 def faultGateCalc(circuit, node, lineSpliced):
     # terminal will contain all the input wires of this logic gate (node)
     terminals = list(circuit[node][1])  
+    accessed = False
 
     print ("THE FAULT IN CONSIDERATION")
     print (lineSpliced)
@@ -400,12 +401,14 @@ def faultGateCalc(circuit, node, lineSpliced):
         for term in terminals:
             if (term == fault_wire_term):
                 circuit[term][3] = fault_wire_val
+                accessed = True
                 print(term + " is ")
                 print(circuit[term][3])  
     # Change wire value to stuck-at value
     elif lineSpliced[1] != 'IN':
         for term in terminals:
             if (term == fault_wire_term):
+                accessed = True
                 print(fault_wire_term + " now has ")
                 circuit[fault_wire_term][3] = fault_wire_val
                 print(circuit[fault_wire_term][3])
@@ -420,7 +423,9 @@ def faultGateCalc(circuit, node, lineSpliced):
             circuit[node][3] = "U"
         else:  # Should not be able to come here
             return -1
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # If the node is an AND gate output, solve and return the output
@@ -442,7 +447,9 @@ def faultGateCalc(circuit, node, lineSpliced):
         if unknownTerm:
             if circuit[node][3] == '1':
                 circuit[node][3] = "U"
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # If the node is a NAND gate output, solve and return the output
@@ -465,7 +472,9 @@ def faultGateCalc(circuit, node, lineSpliced):
         if unknownTerm:
             if circuit[node][3] == '0':
                 circuit[node][3] = "U"
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # If the node is an OR gate output, solve and return the output
@@ -486,7 +495,9 @@ def faultGateCalc(circuit, node, lineSpliced):
         if unknownTerm:
             if circuit[node][3] == '0':
                 circuit[node][3] = "U"
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # If the node is an NOR gate output, solve and return the output
@@ -506,7 +517,9 @@ def faultGateCalc(circuit, node, lineSpliced):
         if unknownTerm:
             if circuit[node][3] == '1':
                 circuit[node][3] = "U"
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # If the node is an XOR gate output, solve and return the output
@@ -520,7 +533,9 @@ def faultGateCalc(circuit, node, lineSpliced):
                 count += 1  # For each 1 bit, add one count
             if circuit[term][3] == "U":
                 circuit[node][3] = "U"
-                circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                if accessed:
+                    # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                    circuit[fault_wire_term][3] = old_val 
                 return circuit
 
         # check how many 1's we counted
@@ -528,7 +543,9 @@ def faultGateCalc(circuit, node, lineSpliced):
             circuit[node][3] = '1'
         else:  # Otherwise, the output is equal to how many 1's there are
             circuit[node][3] = '0'
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # If the node is an XNOR gate output, solve and return the output
@@ -542,7 +559,9 @@ def faultGateCalc(circuit, node, lineSpliced):
                 count += 1  # For each 1 bit, add one count
             if circuit[term][3] == "U":
                 circuit[node][3] = "U"
-                circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                if accessed:
+                    # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                    circuit[fault_wire_term][3] = old_val 
                 return circuit
 
         # check how many 1's we counted
@@ -550,7 +569,9 @@ def faultGateCalc(circuit, node, lineSpliced):
             circuit[node][3] = '1'
         else:  # Otherwise, the output is equal to how many 1's there are
             circuit[node][3] = '0'
-        circuit[fault_wire_term][3] = old_val # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+        if accessed:
+            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
         return circuit
 
     # Error detection... should not be able to get at this point
