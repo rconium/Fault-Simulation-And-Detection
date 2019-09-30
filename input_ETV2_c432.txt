@@ -1,0 +1,10 @@
+# test vector file
+# for circuit_benchmark\c432.bench
+# input_fsd_ETV_set 2_c432.txt
+# given ETV_set 2(2 TV)
+
+# alternating 0 and 1’s with LSB = 1
+010101010101010101010101010101010101
+
+# alternating 0 and 1’s with LSB = 0
+101010101010101010101010101010101010
