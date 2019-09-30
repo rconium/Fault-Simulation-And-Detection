@@ -373,29 +373,29 @@ def faultGateCalc(circuit, node, lineSpliced):
         fault_wire_node = 'wire_' + lineSpliced[0]
         fault_wire_term = 'wire_' + lineSpliced[2]
         fault_wire_val = lineSpliced[4]
-        print (fault_wire_node)
-        print (fault_wire_term)
-        print (fault_wire_val)
+        # print (fault_wire_node)
+        # print (fault_wire_term)
+        # print (fault_wire_val)
     else:
         fault_wire_term = 'wire_' + lineSpliced[0]
         fault_wire_node = fault_wire_term
         fault_wire_val = lineSpliced[2]
-        print (fault_wire_node)
-        print (fault_wire_term)
-        print ('NEW VALUE')
-        print (fault_wire_val)
-        print("")
+        # print (fault_wire_node)
+        # print (fault_wire_term)
+        # print ('NEW VALUE')
+        # print (fault_wire_val)
+        # print("")
 
-    print("THIS IS THE CURRENT NODE")
-    print(node)
-    print(lineSpliced[1])
-    print(terminals)
+    # print("THIS IS THE CURRENT NODE")
+    # print(node)
+    # print(lineSpliced[1])
+    # print(terminals)
 
-    print("THIS IS THE CURRENT TERM")
-    print(fault_wire_term)
-    print("OLD VALUE ")
+    # print("THIS IS THE CURRENT TERM")
+    # print(fault_wire_term)
+    # print("OLD VALUE ")
     old_val = circuit[fault_wire_term][3]
-    print(old_val)
+    # print(old_val)
 
     # Change gate input terminal wire value to stuck-at value 
     if node == fault_wire_node and lineSpliced[1] == 'IN':
@@ -403,16 +403,16 @@ def faultGateCalc(circuit, node, lineSpliced):
             if (term == fault_wire_term):
                 circuit[term][3] = fault_wire_val
                 accessed = True
-                print(term + " is ")
-                print(circuit[term][3])  
+                # print(term + " is ")
+                # print(circuit[term][3])  
     # Change wire value to stuck-at value
     elif lineSpliced[1] != 'IN':
         for term in terminals:
             if (term == fault_wire_term):
-                accessed = True
-                print(fault_wire_term + " now has ")
+                accessed = True                
                 circuit[fault_wire_term][3] = fault_wire_val
-                print(circuit[fault_wire_term][3])
+                # print(fault_wire_term + " now has ")
+                # print(circuit[fault_wire_term][3])
     
     # If the node is an Inverter gate output, solve and return the output
     if circuit[node][0] == "NOT":
@@ -663,7 +663,7 @@ def fault_sim(bench, input, f_list, jedi, sith):
     outputName = 'fault_sim_result'
     outputFailed = open(outputName, "w")
     rank = 1
-    detected_fails = 0
+    # detected_fails = 0
     size = len(sith)
     faults = []
 
@@ -681,11 +681,15 @@ def fault_sim(bench, input, f_list, jedi, sith):
                 if padawan == hatred:
                     if master != anger:
                         outputFailed.write(darth + ": " + hatred + " -> " + anger + "\n")
-                        detected_fails += 1
-                        faults.append(darth)
+                        # detected_fails += 1
+                        if darth not in faults:
+                            faults.append(darth)
                     continue
 
         rank += 1
+    
+    detected_fails = len(faults)
+    print (faults)
     
     outputFailed.write("total detected faults: " + str(detected_fails) + "\n\n")
     outputFailed.write("undetected faults: " + str(size - detected_fails) + "\n")
@@ -696,7 +700,7 @@ def fault_sim(bench, input, f_list, jedi, sith):
     for x in faults:
         outputFailed.write(x + "\n")
     
-    outputFailed.write("fault coverage: " + detected_fails + "/" + size + " = " + str((detected_fails/size) * 100))
+    outputFailed.write("\nfault coverage: " + str(detected_fails) + "/" + str(size) + " = " + str((detected_fails/size) * 100) + "%")
     outputFailed.close()
     return
 
