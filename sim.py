@@ -33,7 +33,22 @@ def printCkt (circuit):
 def netRead(netName):
     # Opening the netlist file:
     netFile = open(netName, "r")
-    outputFile = open('full_f_list', "w")
+
+    # Used for file access
+    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+
+    # Select output file, default is output.txt
+    while True:
+        outputName = 'full_f_list.txt'
+        print("\n Type full fault output list filename (eg. " + outputName + "): ")
+        userInput = input()
+        outputName = userInput
+        if userInput == "":
+            break
+        else:
+            outputName = os.path.join(script_dir, userInput)
+            break
+    outputFile = open(outputName, "w")
 
     # temporary variables
     inputs = []     # array of the input wires
@@ -659,15 +674,27 @@ def basic_sim(circuit, lineSpliced, mode):
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: detects faults for each test vector  
-def fault_sim(bench, input, f_list, jedi, sith):
-    outputName = 'fault_sim_result'
+def fault_sim(bench, f_input, f_list, jedi, sith):
+    # Used for file access
+    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+    
+    # Select output file, default is output.txt
+    while True:
+        outputName = "fault_sim_result.txt"
+        print("\n Write output file: use " + outputName + "?" + " Enter to accept or type filename: ")
+        userInput = input()
+        if userInput == "":
+            break
+        else:
+            outputName = os.path.join(script_dir, userInput)
+            break
+
     outputFailed = open(outputName, "w")
     rank = 1
-    # detected_fails = 0
     size = len(sith)
     faults = []
 
-    comment = '# fault sim result\n# input: ' + bench + '\n# input: ' + input + '\n# input: ' + f_list
+    comment = '# fault sim result\n# input: ' + bench + '\n# input: ' + f_input + '\n# input: ' + f_list
     outputFailed.write(comment + '\n')
 
     # padawan = test vector, master = result
@@ -681,7 +708,6 @@ def fault_sim(bench, input, f_list, jedi, sith):
                 if padawan == hatred:
                     if master != anger:
                         outputFailed.write(darth + ": " + hatred + " -> " + anger + "\n")
-                        # detected_fails += 1
                         if darth not in faults:
                             faults.append(darth)
                     continue
@@ -689,7 +715,6 @@ def fault_sim(bench, input, f_list, jedi, sith):
         rank += 1
     
     detected_fails = len(faults)
-    print (faults)
     
     outputFailed.write("total detected faults: " + str(detected_fails) + "\n\n")
     outputFailed.write("undetected faults: " + str(size - detected_fails) + "\n")
@@ -742,12 +767,11 @@ def main():
 
     # Select input file, default is input.txt
     while True:
-        inputName = "input.txt"
+        inputName = "input_fsd.txt"
         print("\n Read input vector file: use " + inputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         preserver = userInput
         if userInput == "":
-
             break
         else:
             inputName = os.path.join(script_dir, userInput)
@@ -758,7 +782,7 @@ def main():
 
     # Select output file, default is output.txt
     while True:
-        outputName = "output.txt"
+        outputName = "output_fsd.txt"
         print("\n Write output file: use " + outputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
@@ -856,8 +880,36 @@ def main():
     print ("*************NOW RUNNING FAULT SIMULATION*************")
     outputFile.close
     inputFile.close
-    inputFault = 'full_f_list'
-    outputFault = 'full_fault_sim_result'
+
+    # Select input file, default is f_list.txt
+    while True:
+        inputFault = 'f_list.txt'
+        print("\n Type fault list filename (eg. " + inputFault + "): ")
+        userInput = input()
+        inputFault = userInput
+        if userInput == "":
+            break
+        else:
+            inputFault = os.path.join(script_dir, userInput)
+            if not os.path.isfile(inputFault):
+                print("File does not exist. \n")
+            else:
+                break
+                
+    # Select output file, default is f_output.txt
+    while True:
+        outputFault = 'f_output.txt'
+        print("\n Type fault output filename (eg. " + outputFault + "): ")
+        userInput = input()
+        outputFault = userInput
+        if userInput == "":
+            break
+        else:
+            outputFault = os.path.join(script_dir, userInput)
+            break
+
+    # inputFault = 'full_f_list.txt'
+    # outputFault = 'full_fault_sim_result'
     inputFaultFile = open(inputFault, "r")
     outputFaultFile = open(outputFault, "w")
     curr_bad_output = {}
@@ -912,7 +964,6 @@ def main():
             # printCkt(circuit)
             print(circuit)
 
-
             if circuit == -1:
                 print("INPUT ERROR: INSUFFICIENT BITS")
                 outputFaultFile.write(" -> INPUT ERROR: INSUFFICIENT BITS" + "\n")
@@ -963,11 +1014,9 @@ def main():
 
         detect_map[fault] = curr_bad_output
         curr_bad_output = {}
-    print(detect_map)
     outputFaultFile.close
     #exit()
     fault_sim(bench, preserver, inputFault, good_output, detect_map)
-
 
 if __name__ == "__main__":
     main()
