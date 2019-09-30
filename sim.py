@@ -856,7 +856,7 @@ def main():
     print ("*************NOW RUNNING FAULT SIMULATION*************")
     outputFile.close
     inputFile.close
-    inputFault = 'f_list.txt'
+    inputFault = 'full_f_list'
     outputFault = 'full_fault_sim_result'
     inputFaultFile = open(inputFault, "r")
     outputFaultFile = open(outputFault, "w")
