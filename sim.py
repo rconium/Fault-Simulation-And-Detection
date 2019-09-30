@@ -358,7 +358,8 @@ def gateCalc(circuit, node):
     # Error detection... should not be able to get at this point
     return circuit[node][0]
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: calculates the output value for each logic gate using faulty input/outputwires
 def faultGateCalc(circuit, node, lineSpliced):
     # terminal will contain all the input wires of this logic gate (node)
     terminals = list(circuit[node][1])  
@@ -656,6 +657,48 @@ def basic_sim(circuit, lineSpliced, mode):
 
     return circuit
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# FUNCTION: detects faults for each test vector  
+def fault_sim(bench, input, f_list, jedi, sith):
+    outputName = 'fault_sim_result'
+    outputFailed = open(outputName, "w")
+    rank = 1
+    detected_fails = 0
+    size = len(sith)
+    faults = []
+
+    comment = '# fault sim result\n# input: ' + bench + '\n# input: ' + input + '\n# input: ' + f_list
+    outputFailed.write(comment + '\n')
+
+    # padawan = test vector, master = result
+    for padawan, master in jedi.items():
+        outputFailed.write("\ntv" + str(rank) + " = " + padawan + " -> " + master + " (good)\ndetected:\n")
+
+        # darth = fault in consideration, acolyte = dictionary of faulty outputs
+        for darth, acolyte in sith.items(): 
+            # hatred = test vector, anger = result
+            for hatred, anger in acolyte.items():
+                if padawan == hatred:
+                    if master != anger:
+                        outputFailed.write(darth + ": " + hatred + " -> " + anger + "\n")
+                        detected_fails += 1
+                        faults.append(darth)
+                    continue
+
+        rank += 1
+    
+    outputFailed.write("total detected faults: " + str(detected_fails) + "\n\n")
+    outputFailed.write("undetected faults: " + str(size - detected_fails) + "\n")
+
+    # Get the undetected faults
+    faults = list(set(list(sith.keys())) - set(faults))
+
+    for x in faults:
+        outputFailed.write(x + "\n")
+    
+    outputFailed.write("fault coverage: " + detected_fails + "/" + size + " = " + str((detected_fails/size) * 100))
+    outputFailed.close()
+    return
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # FUNCTION: Main Function
@@ -673,6 +716,7 @@ def main():
         cktFile = "circuit.bench"   
         print("\n Read circuit benchmark file: use " + cktFile + "?" + " Enter to accept or type filename: ")
         userInput = input()
+        bench = userInput
         if userInput == "":
             break
         else:
@@ -697,6 +741,7 @@ def main():
         inputName = "input.txt"
         print("\n Read input vector file: use " + inputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
+        preserver = userInput
         if userInput == "":
 
             break
@@ -724,6 +769,8 @@ def main():
     print("\n *** Simulating the" + inputName + " file and will output in" + outputName + "*** \n")
     inputFile = open(inputName, "r")
     outputFile = open(outputName, "w")
+    good_output = {}
+    detect_map = {}
 
     # Runs the simulator for each line of the input file
     for line in inputFile:
@@ -785,6 +832,7 @@ def main():
         print("\n *** Summary of simulation: ")
         print(line + " -> " + output + " written into output file. \n")
         outputFile.write(" -> " + output + "\n")
+        good_output[line] = output
 
         # After each input line is finished, reset the circuit
         print("\n *** Now resetting circuit back to unknowns... \n")
@@ -801,10 +849,14 @@ def main():
 
         print("\n*******************\n")
 
+    print ("*************NOW RUNNING FAULT SIMULATION*************")
     outputFile.close
     inputFile.close
-    inputFaultFile = open('fault_list1.txt', "r")
-    outputFaultFile = open('fault_list1_output', "w")
+    inputFault = 'f_list.txt'
+    outputFault = 'full_fault_sim_result'
+    inputFaultFile = open(inputFault, "r")
+    outputFaultFile = open(outputFault, "w")
+    curr_bad_output = {}
 
     # Reading in the fault_list1 file line by line
     for fault in inputFaultFile:
@@ -887,6 +939,7 @@ def main():
             print("\n *** Summary of simulation: ")
             print(line + " -> " + output + " written into output file. \n")
             outputFaultFile.write(" -> " + output + "\n")
+            curr_bad_output[line] = output
 
             # After each input line is finished, reset the circuit
             print("\n *** Now resetting circuit back to unknowns... \n")
@@ -903,9 +956,13 @@ def main():
 
             print("\n*******************\n")
             inputFile.close
-    
+
+        detect_map[fault] = curr_bad_output
+        curr_bad_output = {}
+    print(detect_map)
     outputFaultFile.close
     #exit()
+    fault_sim(bench, preserver, inputFault, good_output, detect_map)
 
 
 if __name__ == "__main__":
