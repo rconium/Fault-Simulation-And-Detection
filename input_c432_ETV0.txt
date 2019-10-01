@@ -1,5 +1,5 @@
 # test vector file
-# for circuit_benchmark\c432.bench
+# for c432.bench
 # input_fsd_ETV_set 0_c432.txt
 # given ETV_set 0(1 TV)
 

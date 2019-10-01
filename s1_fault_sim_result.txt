@@ -1,7 +1,7 @@
 # fault sim result
 # input: 
 # input: 
-# input: C:\Users\Lava\Documents\GitHub\Fault-Simulation-And-Detection\f_list.txt
+# input: s1_f_list.txt
 
 tv1 = 000000 -> 0000 (good)
 detected:
@@ -20,6 +20,7 @@ tv4 = 010101 -> 0111 (good)
 detected:
 Z0-IN-a0-SA-0: 010101 -> 0110
 b2-SA-1: 010101 -> 1011
+
 total detected faults: 4
 
 undetected faults: 1
