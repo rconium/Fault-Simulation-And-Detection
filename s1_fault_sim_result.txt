@@ -1,7 +1,7 @@
 # fault sim result
 # input: 
 # input: 
-# input: f_list.txt
+# input: s1_f_list.txt
 
 tv1 = 000000 -> 0000 (good)
 detected:

@@ -1,0 +1,8 @@
+# test vector file
+# for c432.bench
+# input_fsd_ETV_set 1_c432.txt
+# given ETV_set 1(1 TV)
+
+
+# all 1s
+111111111111111111111111111111111111
