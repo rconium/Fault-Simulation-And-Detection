@@ -240,6 +240,9 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             fault_wire_term = 'wire_' + lineSpliced[0]
             fault_wire_node = fault_wire_term
             fault_wire_val = lineSpliced[2]
+            print ("THE NODE IS " + fault_wire_node)
+            print ("THE TERM IS " + fault_wire_term)
+            print ("THE VALUE IS " + fault_wire_val)
 
         old_val = circuit[fault_wire_term][3]
 
@@ -251,10 +254,17 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
                     accessed = True 
         # Change wire value to stuck-at value
         elif lineSpliced[1] != 'IN':
+
             for term in terminals:
                 if (term == fault_wire_term):
                     accessed = True                
                     circuit[fault_wire_term][3] = fault_wire_val
+                    print ("wire_" + term + " = " + fault_wire_val)
+                    break
+            
+            circuit[node][3] = fault_wire_val
+            print (node + " = " + fault_wire_val)
+            return circuit 
     
     # If the node is an Inverter gate output, solve and return the output
     if circuit[node][0] == "NOT":
@@ -731,8 +741,6 @@ def main():
             outputFault = os.path.join(script_dir, userInput)
             break
 
-    # inputFault = 'full_f_list.txt'
-    # outputFault = 'full_fault_sim_result'
     inputFaultFile = open(inputFault, "r")
     outputFaultFile = open(outputFault, "w")
     curr_bad_output = {}
