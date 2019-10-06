@@ -1,6 +1,6 @@
 # test vector file
 # for circuit.bench
-# input_fsd.txt
+# input_s1.txt
 # given ETV_set 3: 4 TV s
 
 # all 0s

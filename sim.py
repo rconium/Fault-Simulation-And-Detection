@@ -245,6 +245,11 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             print ("THE VALUE IS " + fault_wire_val)
 
         old_val = circuit[fault_wire_term][3]
+        if lineSpliced[1] == 'SA':
+            for x in circuit['OUTPUTS'][1]:
+                if node == x and node == fault_wire_node:
+                    circuit[node][3] = fault_wire_val
+                    return circuit
 
         # Change gate input terminal wire value to stuck-at value 
         if node == fault_wire_node and lineSpliced[1] == 'IN':
@@ -419,9 +424,9 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
 
         # check how many 1's we counted
         if count % 2 == 1:  # if more than one 1, we know it's going to be 0.
-            circuit[node][3] = '1'
-        else:  # Otherwise, the output is equal to how many 1's there are
             circuit[node][3] = '0'
+        else:  # Otherwise, the output is equal to how many 1's there are
+            circuit[node][3] = '1'
         if accessed:
             # restore to original value before stuck-at so that it will disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
@@ -513,7 +518,7 @@ def fault_sim(bench, f_input, f_list, jedi, sith):
     
     # Select output file, default is output.txt
     while True:
-        outputName = "fault_sim_result.txt"
+        outputName = "s1_fault_sim_result.txt"
         print("\n Write output file: use " + outputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
@@ -575,7 +580,7 @@ def main():
 
     # Select circuit benchmark file, default is circuit.bench
     while True:
-        cktFile = "circuit.bench"   
+        cktFile = "s1.bench"   
         print("\n Read circuit benchmark file: use " + cktFile + "?" + " Enter to accept or type filename: ")
         userInput = input()
         bench = userInput
@@ -600,7 +605,7 @@ def main():
 
     # Select input file, default is input.txt
     while True:
-        inputName = "input_fsd.txt"
+        inputName = "input_s1.txt"
         print("\n Read input vector file: use " + inputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         preserver = userInput
@@ -615,7 +620,7 @@ def main():
 
     # Select output file, default is output.txt
     while True:
-        outputName = "output_fsd.txt"
+        outputName = "output_s1.txt"
         print("\n Write output file: use " + outputName + "?" + " Enter to accept or type filename: ")
         userInput = input()
         if userInput == "":
@@ -716,7 +721,7 @@ def main():
 
     # Select input file, default is f_list.txt
     while True:
-        inputFault = 'f_list.txt'
+        inputFault = 's1_f_list.txt'
         print("\n Type fault list filename (eg. " + inputFault + "): ")
         userInput = input()
         inputFault = userInput
@@ -731,7 +736,7 @@ def main():
                 
     # Select output file, default is f_output.txt
     while True:
-        outputFault = 'f_output.txt'
+        outputFault = 's1_f_output.txt'
         print("\n Type fault output filename (eg. " + outputFault + "): ")
         userInput = input()
         outputFault = userInput
