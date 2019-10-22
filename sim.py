@@ -272,7 +272,22 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
         else:  # Should not be able to come here
             return -1
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
+            circuit[fault_wire_term][3] = old_val 
+        return circuit
+
+    # If the node is an Buffer gate output, solve and return the output
+    elif circuit[node][0] == "BUFF":
+        if circuit[terminals[0]][3] == '0':
+            circuit[node][3] = '0'
+        elif circuit[terminals[0]][3] == '1':
+            circuit[node][3] = '1'
+        elif circuit[terminals[0]][3] == "U":
+            circuit[node][3] = "U"
+        else:  # Should not be able to come here
+            return -1
+        if accessed:
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
@@ -296,7 +311,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             if circuit[node][3] == '1':
                 circuit[node][3] = "U"
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
@@ -321,7 +336,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             if circuit[node][3] == '0':
                 circuit[node][3] = "U"
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
@@ -344,7 +359,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             if circuit[node][3] == '0':
                 circuit[node][3] = "U"
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
@@ -366,7 +381,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             if circuit[node][3] == '1':
                 circuit[node][3] = "U"
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
@@ -382,7 +397,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             if circuit[term][3] == "U":
                 circuit[node][3] = "U"
                 if accessed:
-                    # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                    # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
                     circuit[fault_wire_term][3] = old_val 
                 return circuit
 
@@ -392,7 +407,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
         else:  # Otherwise, the output is equal to how many 1's there are
             circuit[node][3] = '0'
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
@@ -408,7 +423,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
             if circuit[term][3] == "U":
                 circuit[node][3] = "U"
                 if accessed:
-                    # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+                    # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
                     circuit[fault_wire_term][3] = old_val 
                 return circuit
 
@@ -418,7 +433,7 @@ def gateCalc(circuit, node, lineSpliced, mode=1):
         else:  # Otherwise, the output is equal to how many 1's there are
             circuit[node][3] = '1'
         if accessed:
-            # restore to original value before stuck-at so that it will disrupt other processes that use same wire
+            # restore to original value before stuck-at so that it will not disrupt other processes that use same wire
             circuit[fault_wire_term][3] = old_val 
         return circuit
 
